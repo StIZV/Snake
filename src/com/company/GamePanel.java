@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.LinkedList;
 import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener, KeyListener {
@@ -17,9 +18,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     private boolean isStarted;
 
-    private int snakeSize = 2;
     private int snakeX = 0;
     private int snakeY = 0;
+    private LinkedList<SnakePart> parts = new LinkedList<>();
+
     private Direction direction = Direction.Right;
 
     private int foodX = 0;
@@ -42,6 +44,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         snakeX = 5;
         snakeY = FIELD_SIZE / 2;
+
+        parts.add(new SnakePart(snakeX-1,snakeY));
 
         timer.start();
     }
@@ -70,6 +74,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             g.setColor(new Color(255, 255, 255));
             g.fillOval(snakeX * cellSize, snakeY * cellSize, cellSize, cellSize);
 
+            for (SnakePart part : parts){
+                g.fillOval(part.getX() * cellSize, part.getY() * cellSize, cellSize, cellSize);
+            }
+
             food.paintIcon(this, g, foodX * cellSize, foodY * cellSize);
         }
     }
@@ -81,6 +89,17 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         if (!isStarted) {
             return;
         }
+
+        boolean isFoodEaten = false;
+        if (snakeX == foodX && snakeY == foodY){
+            isFoodEaten = true;
+            generateFoodPosition();
+        }
+
+        if (!isFoodEaten){
+            parts.removeFirst();
+        }
+        parts.add(new SnakePart(snakeX,snakeY));
 
         if (direction == Direction.Up) {
             snakeY -= 1;
